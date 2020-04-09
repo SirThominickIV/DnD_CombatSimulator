@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['DnD_CombatSimulator.py'],
-             pathex=['C:\\Users\\Thomas\\source\\repos\\DnD_CombatSimulator\\DnD_CombatSimulator'],
+             pathex=['C:\\Users\\Thomas\\source\\repos\\DnD_CombatSimulator\\DnD_CombatSimulator\\DnD_CombatSimulator\\DnD_CombatSimulator'],
              binaries=[],
              datas=[],
              hiddenimports=[],
