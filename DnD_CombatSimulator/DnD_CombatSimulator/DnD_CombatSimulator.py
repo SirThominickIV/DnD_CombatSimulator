@@ -50,10 +50,10 @@ class Creature:
         self.initiative = initiative        #How quick is it   
        
 #Simulation input
-def simulationinput():
+def Main():
     os.system("cls")
 
-    #Collecting input data for second creature
+    #Collecting input data for first creature
     while True:
         try:
             name1 = input("Please enter the name of the first creature:\n>")
@@ -230,6 +230,14 @@ def oneRound(creature1, creature2):
     intRoll1 = random.randint(1,20) + creature1.initiative
     intRoll2 = random.randint(1,20) + creature2.initiative
 
+    #Dealing with a tie
+    if intRoll1 == intRoll2:
+        tiebreaker = random.randint(1,2)
+        if tiebreaker == 1:
+            intRoll1 = intRoll2 + 1
+        if tiebreaker == 2:
+            intRoll2 = intRoll1 + 1
+
     #Temp HP, so the original is not lost
     tmpHP1 = creature1.hp
     tmpHP2 = creature2.hp
@@ -303,7 +311,7 @@ while True:
     os.system("cls")
     choice = menu()
     if choice == 1:
-        simulationinput()
+        Main()
     elif choice == 2:
         menucontinue = help()
     elif choice == 3:
