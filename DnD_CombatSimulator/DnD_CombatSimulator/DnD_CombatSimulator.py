@@ -48,18 +48,23 @@ class Creature:
         self.avedam = avedam                #How much damage it does
         self.heal = heal                    #How much it heals itself, if at all
         self.initiative = initiative        #How quick is it   
-       
-#Simulation input
-def Main():
-    os.system("cls")
 
-    #Collecting input data for first creature
-    while True:
-        try:
-            name1 = input("Please enter the name of the first creature:\n>")
-            break
-        except:
-            print("Invalid input, please try again")
+def CreatureInput(CreatureNumber):
+
+    if CreatureNumber == 1:
+        while True:
+            try:
+                name1 = input("Please enter the name of the first creature:\n>")
+                break
+            except:
+                print("Invalid input, please try again")
+    else:
+        while True:
+            try:
+                name1 = input("Please enter the name of the second creature:\n>")
+                break
+            except:
+                print("Invalid input, please try again")
     while True:
         try:
             hp1 = int(input("Please enter the HP of " + name1 + ":\n>"))
@@ -105,65 +110,16 @@ def Main():
     print("Average Healing = " + str(heal1))
     print("Initiative = " + str(int1))
     print("============================================")
+    print("")
 
-    #Putting all the stats into one object
-    creature1 = Creature(name1, hp1, ac1, tohit1, avedam1, heal1, int1)
+    creatureR = Creature(name1, hp1, ac1, tohit1, avedam1, heal1, int1)
+    return creatureR
 
-    #Collecting input data for second creature
-    while True:
-        try:
-            name2 = input("Please enter the name of the second creature:\n>")
-            break
-        except:
-            print("Invalid input, please try again")
-    while True:
-        try:
-            hp2 = int(input("Please enter the HP of " + name2 + ":\n>"))
-            break
-        except:
-            print("Invalid input, please try again")
-    while True:
-        try:
-            ac2 = int(input("Please enter the AC of " + name2 + ":\n>"))
-            break
-        except:
-            print("Invalid input, please try again")
-    while True:
-        try:
-            tohit2 = int(input("Please enter the To Hit Bonus of " + name2 + ":\n>"))
-            break
-        except:
-            print("Invalid input, please try again")
-    while True:
-        try:
-            avedam2 = int(input("Please enter the average damage per round of " + name2 + ":\n>"))
-            break
-        except:
-            print("Invalid input, please try again")
-    while True:
-        try:
-            heal2 = int(input("Please enter the average self healing per round of " + name2 + ":\n>"))
-            break
-        except:
-            print("Invalid input, please try again")
-    while True:
-        try:
-            int2 = int(input("Please enter the initiative of " + name2 + ":\n>"))
-            break
-        except:
-            print("Invalid input, please try again")
-    print("============================================")
-    print("The second creature is " + name2)
-    print("HP = " + str(hp2))
-    print("AC = " + str(ac2))
-    print("To Hit = " + str(tohit2))
-    print("Average Damage = " + str(avedam2))
-    print("Average Healing = " + str(heal2))
-    print("Initiative = " + str(int2))
-    print("============================================")
+def Main():
+    os.system("cls")
 
-    #Putting all the stats into one object
-    creature2 = Creature(name2, hp2, ac2, tohit2, avedam2, heal2, int2)
+    creature1 = CreatureInput(1)
+    creature2 = CreatureInput(2)
 
     #Asking how many rounds to simulate
     while True:
@@ -200,21 +156,21 @@ def Main():
 
     #Final Output
     print("\n\n============================================")
-    print("The first creature is " + name1)
-    print("HP = " + str(hp1))
-    print("AC = " + str(ac1))
-    print("To Hit = " + str(tohit1))
-    print("Average Damage = " + str(avedam1))
-    print("Average Healing = " + str(heal1))
-    print("Initiative = " + str(int1))
+    print("The first creature is " + creature1.name)
+    print("HP = " + str(creature1.hp))
+    print("AC = " + str(creature1.ac))
+    print("To Hit = " + str(creature1.tohit))
+    print("Average Damage = " + str(creature1.avedam))
+    print("Average Healing = " + str(creature1.heal))
+    print("Initiative = " + str(creature1.initiative))
     print("============================================")
-    print("The second creature is " + name2)
-    print("HP = " + str(hp2))
-    print("AC = " + str(ac2))
-    print("To Hit = " + str(tohit2))
-    print("Average Damage = " + str(avedam2))
-    print("Average Healing = " + str(heal2))
-    print("Initiative = " + str(int2))
+    print("The second creature is " + creature2.name)
+    print("HP = " + str(creature2.hp))
+    print("AC = " + str(creature2.ac))
+    print("To Hit = " + str(creature2.tohit))
+    print("Average Damage = " + str(creature2.avedam))
+    print("Average Healing = " + str(creature2.heal))
+    print("Initiative = " + str(creature2.initiative))
     print("============================================")
     
     print("\n\n" + creature1.name + " won " + "{:.2%}".format(creature1winpercent) + " of the time, totalling " + str(creature1wins) + " wins.\n")
