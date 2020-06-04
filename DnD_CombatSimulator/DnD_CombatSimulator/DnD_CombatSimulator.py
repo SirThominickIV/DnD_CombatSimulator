@@ -42,12 +42,20 @@ def help():
 class Creature:
     def __init__(self, name, hp, ac, tohit, avedam, heal, initiative):
         self.name = name                    #The name
-        self.hp = hp                        #How much health does it have
+        self.hp = hp                        #How much health can it have
+        self.curhp = hp                     #How much HP does it currently have
         self.ac = ac                        #How hard to hit is it
         self.tohit = tohit                  #How good at hitting it is
         self.avedam = avedam                #How much damage it does
         self.heal = heal                    #How much it heals itself, if at all
-        self.initiative = initiative        #How quick is it   
+        self.initiative = initiative        #How quick is it
+        self.wins = 0                       #How many times it won
+        self.winpercent = 0/1               #What percentage of the time it won                 
+
+class CreaturePair:                             #For passing both creatures with a single return
+    def __init__(self, creature1, creature2):
+        self.creature1 = creature1
+        self.creature2 = creature2
 
 def CreatureInput(CreatureNumber):
 
@@ -101,6 +109,7 @@ def CreatureInput(CreatureNumber):
             break
         except:
             print("Invalid input, please try again")
+
     print("============================================")
     print("The first creature is " + name1)
     print("HP = " + str(hp1))
@@ -132,8 +141,6 @@ def Main():
     #Round tracking
     simmedRounds = 0
     roundresult = 0
-    creature1wins = 0
-    creature2wins = 0
 
     #Win %
     creature1winpercent = 0.00
@@ -143,16 +150,14 @@ def Main():
     while simmedRounds != numRounds:
         roundresult = oneRound(creature1, creature2)
         if roundresult == 1:
-            creature1wins = creature1wins + 1
             print("Round #" + str(simmedRounds) + " - " + str(creature1.name) + " won.")
         else:
-            creature2wins = creature2wins + 1
             print("Round #" + str(simmedRounds) + " - " + str(creature2.name) + " won.")
         simmedRounds = simmedRounds + 1;
 
     #Final calculation
-    creature1winpercent = creature1wins/numRounds
-    creature2winpercent = creature2wins/numRounds
+    creature1.winpercent = creature1.wins/numRounds
+    creature2.winpercent = creature2.wins/numRounds
 
     #Final Output
     print("\n\n============================================")
@@ -173,15 +178,48 @@ def Main():
     print("Initiative = " + str(creature2.initiative))
     print("============================================")
     
-    print("\n\n" + creature1.name + " won " + "{:.2%}".format(creature1winpercent) + " of the time, totalling " + str(creature1wins) + " wins.\n")
-    print(creature2.name + " won " + "{:.2%}".format(creature2winpercent) + " of the time, totalling " + str(creature2wins) + " wins.\n")
+    print("\n\n" + creature1.name + " won " + "{:.2%}".format(creature1.winpercent) + " of the time, totalling " + str(creature1.wins) + " wins.\n")
+    print(creature2.name + " won " + "{:.2%}".format(creature2.winpercent) + " of the time, totalling " + str(creature2.wins) + " wins.\n")
 
     #Output pause
     menucontinue = input("Press enter to continue . . . ")
     return menucontinue
 
+def CreatureTurn(creaturePair, attacker):
+    #Determining which creature is attacking, with creature1 being the attacker
+    if attacker == 0:
+        creature1 = creaturePair.creature1
+        creature2 = creaturePair.creature2
+    else:
+        creature1 = creaturePair.creature2
+        creature2 = creaturePair.creature1
+
+    creature1.curhp = creature1.curhp + creature1.heal                              #Doing self healing
+    if creature1.curhp > creature1.hp:                                              #Making sure healing won't go over a creature's max hp
+        creature1.curhp = creature1.hp
+    rolltohit = random.randint(1,20) + creature1.tohit                              #Rolling to hit the other creature
+    if rolltohit == 1:                                                              #Checking for a miss - Rolls always miss if the roll is a 1
+        pass
+    elif ((rolltohit >= creature2.ac) or (rolltohit - creature1.tohit == 20)):      #Checking to see if the roll hits the other creature's AC
+        creature2.curhp = creature2.curhp - creature1.avedam                        #Dealing damage to the other creature
+        if rolltohit == 20:                                                         #Checking to see if the hit was a critical hit. If it was, extra damage is done
+            creature2.curhp = creature2.curhp - creature1.avedam                    #Extra damage
+        if creature2.curhp <= 0:                                                    #Checking to see if the other creature died. If it did, the function ends, returning a 1
+            creature1.wins = creature1.wins + 1
+            return 1
+
+    if attacker == 0:
+        creaturePair.creature1 = creature1
+        creaturePair.creature2 = creature2
+    else:
+        creaturePair.creature1 = creature2
+        creaturePair.creature2 = creature1
+
+    return creaturePair;
+    
+
 #Simulate one round
-def oneRound(creature1, creature2):
+def OneRound(creature1, creature2):
     #Rolling for initiative
     intRoll1 = random.randint(1,20) + creature1.initiative
     intRoll2 = random.randint(1,20) + creature2.initiative
@@ -194,67 +232,71 @@ def oneRound(creature1, creature2):
         if tiebreaker == 2:
             intRoll2 = intRoll1 + 1
 
-    #Temp HP, so the original is not lost
-    tmpHP1 = creature1.hp
-    tmpHP2 = creature2.hp
+    #Resetting current HP
+    creature1.curhp = creature1.hp
+    creature2.curhp = creature2.hp
 
     if intRoll1 > intRoll2: #Depending on the initiative roll, it will change which creature goes first
         #Creature 1 goes first
         while True:
             #Creature 1's turn
-            tmpHP1 = tmpHP1 + creature1.heal                                                #Doing self healing
-            if tmpHP1 > creature1.hp:                                                       #Making sure healing won't go over a creature's max hp
-                tmpHP1 = creature1.hp
+            creature1.curhp = creature1.curhp + creature1.heal                              #Doing self healing
+            if creature1.curhp > creature1.hp:                                              #Making sure healing won't go over a creature's max hp
+                creature1.curhp = creature1.hp
             rolltohit = random.randint(1,20) + creature1.tohit                              #Rolling to hit the other creature
             if rolltohit == 1:                                                              #Checking for a miss - Rolls always miss if the roll is a 1
                 pass
             elif ((rolltohit >= creature2.ac) or (rolltohit - creature1.tohit == 20)):      #Checking to see if the roll hits the other creature's AC
-                tmpHP2 = tmpHP2 - creature1.avedam                                          #Dealing damage to the other creature
+                creature2.curhp = creature2.curhp - creature1.avedam                        #Dealing damage to the other creature
                 if rolltohit == 20:                                                         #Checking to see if the hit was a critical hit. If it was, extra damage is done
-                    tmpHP2 = tmpHP2 - creature1.avedam                                      #Extra damage
-                if tmpHP2 <= 0:                                                             #Checking to see if the other creature died. If it did, the function ends, returning a 1
+                    creature2.curhp = creature2.curhp - creature1.avedam                    #Extra damage
+                if creature2.curhp <= 0:                                                    #Checking to see if the other creature died. If it did, the function ends, returning a 1
+                    creature1.wins = creature1.wins + 1
                     return 1
             #Creature 2's turn
-            tmpHP2 = tmpHP2 + creature2.heal
-            if tmpHP2 > creature2.hp:                                                       
-                tmpHP2 = creature2.hp
+            creature2.curhp = creature2.curhp + creature2.heal
+            if creature2.curhp > creature2.hp:                                                       
+                creature2.curhp = creature2.hp
             rolltohit = random.randint(1,20) + creature2.tohit
             if rolltohit == 1:
                 pass
             elif ((rolltohit >= creature1.ac) or (rolltohit - creature2.tohit == 20)):
-                tmpHP1 = tmpHP1 - creature1.avedam
+                creature1.curhp = creature1.curhp - creature1.avedam
                 if rolltohit == 20:
-                    tmpHP1 = tmpHP1 - creature1.avedam
-                if tmpHP1 <= 0:
+                    creature1.curhp = creature1.curhp - creature1.avedam
+                if creature1.curhp <= 0:
+                    creature2.wins = creature2.wins + 1
                     return 2
     else:
         #Creature 2 goes first
         while True:
             #Creature 2's turn
-            tmpHP2 = tmpHP2 + creature2.heal
-            if tmpHP2 > creature2.hp:                                                       
-                tmpHP2 = creature2.hp
+            creature2.curhp = creature2.curhp + creature2.heal
+            if creature2.curhp > creature2.hp:                                                       
+                creature2.curhp = creature2.hp
             rolltohit = random.randint(1,20) + creature2.tohit
             if rolltohit == 1:
                 pass
             elif ((rolltohit >= creature1.ac) or (rolltohit - creature2.tohit == 20)):
-                tmpHP1 = tmpHP1 - creature1.avedam
+                creature1.curhp = creature1.curhp - creature1.avedam
                 if rolltohit == 20:
-                    tmpHP1 = tmpHP1 - creature1.avedam
-                if tmpHP1 <= 0:
+                    creature1.curhp = creature1.curhp - creature1.avedam
+                if creature1.curhp <= 0:
+                    creature2.wins = creature2.wins + 1
                     return 2
             #Creature 1's turn
-            tmpHP1 = tmpHP1 + creature1.heal   
-            if tmpHP1 > creature1.hp:                                                       
-                tmpHP1 = creature1.hp
+            creature1.curhp = creature1.curhp + creature1.heal   
+            if creature1.curhp > creature1.hp:                                                       
+                creature1.curhp = creature1.hp
             rolltohit = random.randint(1,20) + creature1.tohit            
             if rolltohit == 1:                                                     
                 pass
             elif ((rolltohit >= creature2.ac) or (rolltohit - creature1.tohit == 20)):     
-                tmpHP2 = tmpHP2 - creature1.avedam
+                creature2.curhp = creature2.curhp - creature1.avedam
                 if rolltohit == 20:                                      
-                    tmpHP2 = tmpHP2 - creature1.avedam                
-                if tmpHP2 <= 0:                      
+                    creature2.curhp = creature2.curhp - creature1.avedam                
+                if creature2.curhp <= 0:                      
+                    creature1.wins = creature1.wins + 1
                     return 1        
 
 #Website links
