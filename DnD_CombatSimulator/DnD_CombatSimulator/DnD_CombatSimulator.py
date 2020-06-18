@@ -183,40 +183,7 @@ def Main():
 
     #Output pause
     menucontinue = input("Press enter to continue . . . ")
-    return menucontinue
-
-def CreatureTurn(creaturePair, attacker):
-    #Determining which creature is attacking, with creature1 being the attacker
-    if attacker == 0:
-        creature1 = creaturePair.creature1
-        creature2 = creaturePair.creature2
-    else:
-        creature1 = creaturePair.creature2
-        creature2 = creaturePair.creature1
-
-    creature1.curhp = creature1.curhp + creature1.heal                              #Doing self healing
-    if creature1.curhp > creature1.hp:                                              #Making sure healing won't go over a creature's max hp
-        creature1.curhp = creature1.hp
-    rolltohit = random.randint(1,20) + creature1.tohit                              #Rolling to hit the other creature
-    if rolltohit == 1:                                                              #Checking for a miss - Rolls always miss if the roll is a 1
-        pass
-    elif ((rolltohit >= creature2.ac) or (rolltohit - creature1.tohit == 20)):      #Checking to see if the roll hits the other creature's AC
-        creature2.curhp = creature2.curhp - creature1.avedam                        #Dealing damage to the other creature
-        if rolltohit == 20:                                                         #Checking to see if the hit was a critical hit. If it was, extra damage is done
-            creature2.curhp = creature2.curhp - creature1.avedam                    #Extra damage
-        if creature2.curhp <= 0:                                                    #Checking to see if the other creature died. If it did, the function ends, returning a 1
-            creature1.wins = creature1.wins + 1
-            return 1
-
-    if attacker == 0:
-        creaturePair.creature1 = creature1
-        creaturePair.creature2 = creature2
-    else:
-        creaturePair.creature1 = creature2
-        creaturePair.creature2 = creature1
-
-    return creaturePair;
-    
+    return menucontinue    
 
 #Simulate one round
 def OneRound(creature1, creature2):
